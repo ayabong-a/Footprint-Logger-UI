@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Carbon Footprint Logger</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+  <h1>🌍 Carbon Footprint Logger</h1>
+
+  <div class="card">
+    <h3>Add Activity</h3>
+
+    <div class="grid">
+      <div>
+        <label>Category</label>
+        <select id="category"></select>
+      </div>
+
+      <div>
+        <label>Activity</label>
+        <select id="activity"></select>
+      </div>
+
+      <div>
+        <label>Amount</label>
+        <input type="number" id="amount" min="1" placeholder="e.g. 10" />
+      </div>
+    </div>
+
+    <button id="addBtn">Add Activity</button>
+  </div>
+
+  <div class="card">
+    <h3>Filter Activities</h3>
+    <select id="filter">
+      <option value="all">All Categories</option>
+      <option value="transport">Transport</option>
+      <option value="food">Food</option>
+      <option value="energy">Energy</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <h3>Logged Activities</h3>
+    <div id="activities" class="muted">No activities logged yet.</div>
+    <div class="total">
+      Filtered Total CO₂: <span id="total">0</span> kg
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Emissions by Category (All Data)</h3>
+    <canvas id="chart" width="600" height="250"></canvas>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
