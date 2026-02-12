@@ -1,4 +1,4 @@
-const API = "http://localhost:5000/api";
+const API = process.env.API;
 
 const welcome = document.getElementById("welcome");
 const user = JSON.parse(localStorage.getItem("user"));
