@@ -42,4 +42,28 @@ router.get("/leaderboard", async (req, res) => {
   res.json(leaderboard);
 });
 
+router.get("/weekly-summary", auth, async (req, res) => {
+  const startOfWeek = new Date();
+  startOfWeek.setDate(startOfWeek.getDate() - 6);
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  const activities = await Activity.find({
+    userId: req.user.id,
+    date: { $gte: startOfWeek }
+  });
+
+  const total = activities.reduce((sum, a) => sum + a.co2, 0);
+
+  // streak: number of unique days with activity
+  const daysLogged = new Set(
+    activities.map(a => a.date.toISOString().slice(0, 10))
+  );
+
+  res.json({
+    weeklyTotal: total,
+    streak: daysLogged.size
+  });
+});
+
+
 module.exports = router;

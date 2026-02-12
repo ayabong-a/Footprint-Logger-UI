@@ -1,25 +1,58 @@
+const API = "http://localhost:5000/api";
+
+const welcome = document.getElementById("welcome");
+const user = JSON.parse(localStorage.getItem("user"));
+const token = localStorage.getItem("token");
+
+if (!token) {
+  window.location.href = "login.html";
+} else if (user) {
+  welcome.textContent = `Logged in as ${user.email}`;
+}
+
+async function validateSession() {
+  const res = await fetch(`${API}/activities`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    localStorage.removeItem("token");
+    window.location.href = "login.html";
+  }
+}
+
+validateSession();
+
 const ACTIVITIES = {
   transport: {
     car: { label: "Car travel (km)", co2: 0.21 },
     bus: { label: "Bus travel (km)", co2: 0.1 },
     train: { label: "Train travel (km)", co2: 0.05 },
-    flight: { label: "Short-haul flight (km)", co2: 0.15 }
+    flight: { label: "Short-haul flight (km)", co2: 0.15 },
   },
   food: {
     meat: { label: "Meat-based meal", co2: 2.5 },
     dairy: { label: "Dairy-heavy meal", co2: 1.8 },
     plant: { label: "Plant-based meal", co2: 0.8 },
-    processed: { label: "Processed food meal", co2: 1.2 }
+    processed: { label: "Processed food meal", co2: 1.2 },
   },
   energy: {
     electricity: { label: "Electricity use (kWh)", co2: 0.92 },
     gas: { label: "Gas heating (hour)", co2: 2.0 },
     ac: { label: "Air conditioning (hour)", co2: 1.5 },
-    water: { label: "Hot water use (hour)", co2: 1.0 }
-  }
+    water: { label: "Hot water use (hour)", co2: 1.0 },
+  },
 };
 
-let data = JSON.parse(localStorage.getItem("footprint")) || [];
+let data = [];
+
+async function loadActivities() {
+  const res = await fetch(`${API}/activities`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  data = await res.json();
+  renderActivities();
+}
 
 // DOM elements
 const categorySelect = document.getElementById("category");
@@ -36,11 +69,14 @@ const ctx = canvas.getContext("2d");
 function init() {
   populateCategories();
   updateActivities();
-  renderActivities();
+  loadActivities();
+  loadCommunityAverage();
+  loadLeaderboard();
+  loadWeeklySummary();
 }
 
 function populateCategories() {
-  Object.keys(ACTIVITIES).forEach(cat => {
+  Object.keys(ACTIVITIES).forEach((cat) => {
     const option = document.createElement("option");
     option.value = cat;
     option.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
@@ -52,7 +88,7 @@ function updateActivities() {
   const category = categorySelect.value;
   activitySelect.innerHTML = "";
 
-  Object.values(ACTIVITIES[category]).forEach(activity => {
+  Object.values(ACTIVITIES[category]).forEach((activity) => {
     const option = document.createElement("option");
     option.value = activity.label;
     option.textContent = activity.label;
@@ -60,7 +96,7 @@ function updateActivities() {
   });
 }
 
-function addActivity() {
+async function addActivity() {
   const category = categorySelect.value;
   const activityLabel = activitySelect.value;
   const amount = Number(amountInput.value);
@@ -70,42 +106,68 @@ function addActivity() {
     return;
   }
 
-  const activity = Object.values(ACTIVITIES[category])
-    .find(a => a.label === activityLabel);
+  const activity = Object.values(ACTIVITIES[category]).find(
+    (a) => a.label === activityLabel,
+  );
 
-  const co2 = activity.co2 * amount;
+  const unitCo2 = activity.co2;
+  const co2 = unitCo2 * amount;
 
-  data.push({ category, activity: activityLabel, co2 });
-  localStorage.setItem("footprint", JSON.stringify(data));
+  await fetch(`${API}/activities`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      category,
+      activity: activityLabel,
+      amount,
+      unitCo2
+    }),
+  });
 
   amountInput.value = "";
-  renderActivities();
+  loadActivities();
+  loadCommunityAverage();
+  loadLeaderboard();
+  loadWeeklySummary();
 }
 
 function renderActivities() {
   const filter = filterSelect.value;
   activitiesDiv.innerHTML = "";
 
-  const filtered = filter === "all"
-    ? data
-    : data.filter(item => item.category === filter);
+  const filtered =
+    filter === "all" ? data : data.filter((item) => item.category === filter);
 
   let total = 0;
 
   if (filtered.length === 0) {
-    activitiesDiv.innerHTML = "<div class='muted'>No activities to display.</div>";
+    activitiesDiv.innerHTML =
+      "<div class='muted'>No activities to display.</div>";
   }
 
-  filtered.forEach(item => {
+  filtered.forEach((item) => {
     total += item.co2;
+
     const div = document.createElement("div");
     div.className = "activity";
+
     div.innerHTML = `
-      <span>${item.activity}</span>
-      <strong>${item.co2.toFixed(2)} kg</strong>
-    `;
+    <div>
+      <strong>${item.activity}</strong>
+      <div class="muted small">${item.co2.toFixed(2)} kg</div>
+    </div>
+    <div class="activity-actions">
+      <button class="edit-btn" data-id="${item._id}">Edit</button>
+      <button class="delete-btn" data-id="${item._id}">Delete</button>
+    </div>
+  `;
+
     activitiesDiv.appendChild(div);
-  });
+  })
+  ;
 
   totalSpan.textContent = total.toFixed(2);
   drawChart();
@@ -116,7 +178,7 @@ function drawChart() {
 
   const totals = { transport: 0, food: 0, energy: 0 };
 
-  data.forEach(item => {
+  data.forEach((item) => {
     totals[item.category] += item.co2;
   });
 
@@ -138,9 +200,86 @@ function drawChart() {
   });
 }
 
+async function loadCommunityAverage() {
+  const res = await fetch(`${API}/stats/community-average`);
+  const data = await res.json();
+  document.getElementById("communityAvg").textContent = data.avg
+    ? data.avg.toFixed(2)
+    : "0";
+}
+
+async function loadLeaderboard() {
+  const res = await fetch(`${API}/stats/leaderboard`);
+  const data = await res.json();
+
+  const list = document.getElementById("leaderboard");
+  list.innerHTML = "";
+
+  if (data.length === 0) {
+    list.innerHTML = "<li class='muted'>No data yet</li>";
+    return;
+  }
+
+  data.forEach((user, index) => {
+    const li = document.createElement("li");
+    li.textContent = `User ${index + 1}: ${user.total.toFixed(2)} kg`;
+    list.appendChild(li);
+  });
+}
+
+async function loadWeeklySummary() {
+  const res = await fetch(`${API}/stats/weekly-summary`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const data = await res.json();
+  document.getElementById("weeklyTotal").textContent =
+    data.weeklyTotal.toFixed(2);
+  document.getElementById("streak").textContent = data.streak;
+}
+
+document.getElementById("logoutBtn").onclick = () => {
+  localStorage.removeItem("token");
+  window.location.href = "login.html";
+};
+
 // Event listeners
 categorySelect.addEventListener("change", updateActivities);
 addBtn.addEventListener("click", addActivity);
 filterSelect.addEventListener("change", renderActivities);
+activitiesDiv.addEventListener("click", async (e) => {
+  const id = e.target.dataset.id;
+
+  if (e.target.classList.contains("delete-btn")) {
+    if (!confirm("Delete this activity?")) return;
+
+    await fetch(`http://localhost:5000/api/activities/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
+    });
+
+    loadActivities(); // reload from backend
+  }
+
+  if (e.target.classList.contains("edit-btn")) {
+    const newAmount = prompt("Enter new amount:");
+
+    if (!newAmount || isNaN(newAmount)) return;
+
+    await fetch(`http://localhost:5000/api/activities/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify({ amount: Number(newAmount) })
+    });
+
+    loadActivities();
+  }
+});
+
 
 init();

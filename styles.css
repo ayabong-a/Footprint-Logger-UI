@@ -7,6 +7,21 @@ body {
   color: #2c3e50;
 }
 
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.app-header h1 {
+  margin: 0;
+}
+
+.app-header .muted {
+  margin-top: 4px;
+}
+
 h1 {
   text-align: center;
   margin-bottom: 30px;
@@ -20,10 +35,16 @@ h1 {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
+.card h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 15px;
+  padding-right: 20px;
 }
 
 label {
@@ -57,11 +78,59 @@ button:hover {
   background: #388e3c;
 }
 
+.logout {
+  width: auto;
+  padding: 10px 16px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  font-weight: 600;
+  border: 1px solid #c8e6c9;
+}
+
+.logout:hover {
+  background: #c8e6c9;
+}
+
 .activity {
   display: flex;
   justify-content: space-between;
-  padding: 10px 0;
+  align-items: center;
+  padding: 12px 0;
   border-bottom: 1px solid #eee;
+  font-size: 15px;
+}
+
+.activity-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-btn {
+  background: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #bbdefb;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.edit-btn:hover {
+  background: #bbdefb;
+}
+
+.delete-btn {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.delete-btn:hover {
+  background: #ffcdd2;
+}
+
+.small {
+  font-size: 13px;
 }
 
 .total {
@@ -79,4 +148,58 @@ button:hover {
 canvas {
   margin-top: 20px;
   width: 100%;
+}
+
+/* ============================= */
+/* Auth Pages Styling */
+/* ============================= */
+
+.auth-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e3f2fd, #e8f5e9);
+}
+
+.auth-card {
+  background: white;
+  padding: 35px;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.auth-card h2 {
+  margin-bottom: 8px;
+}
+
+.auth-card form {
+  margin-top: 25px;
+  text-align: left;
+}
+
+.auth-card input {
+  margin-bottom: 15px;
+}
+
+.auth-card button {
+  margin-top: 10px;
+}
+
+.auth-switch {
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.auth-switch a {
+  color: #2e7d32;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Carbon Footprint Logger</title>
@@ -8,7 +9,16 @@
 
 <body>
 
-  <h1>🌍 Carbon Footprint Logger</h1>
+  <header class="app-header">
+    <div>
+      <h1>🌍 Carbon Footprint Logger</h1>
+      <p id="welcome" class="muted"></p>
+    </div>
+
+    <button id="logoutBtn" class="logout">Log out</button>
+  </header>
+
+
 
   <div class="card">
     <h3>Add Activity</h3>
@@ -56,6 +66,39 @@
     <canvas id="chart" width="600" height="250"></canvas>
   </div>
 
+  <div class="card">
+    <h3>Community Average</h3>
+    <p>
+      Average CO₂ emissions across all users:
+      <strong><span id="communityAvg">0</span> kg</strong>
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Low Footprint Leaderboard</h3>
+    <ol id="leaderboard">
+      <li class="muted">Loading leaderboard...</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3>Weekly Summary</h3>
+    <p>
+      CO₂ emitted in the last 7 days:
+      <strong><span id="weeklyTotal">0</span> kg</strong>
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Activity Streak</h3>
+    <p>
+      Days active this week:
+      <strong><span id="streak">0</span> days</strong>
+    </p>
+  </div>
+
+
   <script src="app.js"></script>
 </body>
+
 </html>
