@@ -1,4 +1,4 @@
-const API = "http://localhost:5000/api";
+const API = "https://footprint-logger-ui-2103.onrender.com/api";
 
 function isStrongPassword(password) {
   const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
