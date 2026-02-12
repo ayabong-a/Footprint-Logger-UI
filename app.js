@@ -1,4 +1,4 @@
-const API = process.env.API;
+const API = https://footprint-logger-ui-2103.onrender.com;
 
 const welcome = document.getElementById("welcome");
 const user = JSON.parse(localStorage.getItem("user"));
