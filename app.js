@@ -253,7 +253,7 @@ activitiesDiv.addEventListener("click", async (e) => {
   if (e.target.classList.contains("delete-btn")) {
     if (!confirm("Delete this activity?")) return;
 
-    await fetch(`http://localhost:5000/api/activities/${id}`, {
+    await fetch(`${API}/activities/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -268,7 +268,7 @@ activitiesDiv.addEventListener("click", async (e) => {
 
     if (!newAmount || isNaN(newAmount)) return;
 
-    await fetch(`http://localhost:5000/api/activities/${id}`, {
+    await fetch(`${API}/activities/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
