@@ -5,6 +5,8 @@ const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
 
+const Activity = require("./models/Activity");
+
 const authRoutes = require("./routes/authRoutes");
 const activityRoutes = require("./routes/activityRoutes");
 const statsRoutes = require("./routes/statsRoutes");
