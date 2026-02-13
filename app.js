@@ -73,6 +73,7 @@ function init() {
   loadCommunityAverage();
   loadLeaderboard();
   loadWeeklySummary();
+  loadInsights();
 }
 
 function populateCategories() {
@@ -238,12 +239,27 @@ async function loadWeeklySummary() {
   document.getElementById("streak").textContent = data.streak;
 }
 
+async function loadInsights() {
+  const res = await fetch(`${API}/insights`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (!res.ok) return;
+
+  const data = await res.json();
+
+  document.getElementById("weeklyGoal").textContent =
+    data.weeklyTarget ? data.weeklyTarget.toFixed(2) : "0";
+
+  document.getElementById("weeklyTip").textContent =
+    data.tip || "Log more activities to get insights!";
+}
+
+// Event listeners
 document.getElementById("logoutBtn").onclick = () => {
   localStorage.removeItem("token");
   window.location.href = "login.html";
 };
-
-// Event listeners
 categorySelect.addEventListener("change", updateActivities);
 addBtn.addEventListener("click", addActivity);
 filterSelect.addEventListener("change", renderActivities);
@@ -281,5 +297,19 @@ activitiesDiv.addEventListener("click", async (e) => {
   }
 });
 
-
 init();
+
+// Real-time tip updates
+const socket = io("https://footprint-logger-ui-2103.onrender.com", {
+  transports: ["websocket"]
+});
+ 
+socket.on("connect", () => {
+  if (user) {
+    socket.emit("requestTip", user.id || user._id);
+  }
+});
+
+socket.on("tipUpdate", (data) => {
+  document.getElementById("weeklyTip").textContent = data.tip;
+});
